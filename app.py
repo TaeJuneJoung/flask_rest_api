@@ -1,5 +1,5 @@
 from flask import Flask, escape, request
-from flask_restful import reqparse, abort, Api, Resource
+from flask_restplus import reqparse, abort, Api, Resource
 from flask_cors import CORS
 import database
 
@@ -7,6 +7,9 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
+name_space = api.namespace('api',description='Main APIs')
+
+@name_space.route('/todos')
 class Todos(Resource):
     def get(self):
         return database.get_todos()
@@ -18,6 +21,7 @@ class Todos(Resource):
         database.post_todo(args)
         return args
 
+@name_space.route('/todo/<int:id>')
 class Todo(Resource):
     def get(self, id):
         try:
@@ -45,9 +49,6 @@ class Todo(Resource):
         except TypeError:
             data = abort(404, message=f"Todo id:{id} doesn't exist")
         return data
-
-api.add_resource(Todos, '/todos')
-api.add_resource(Todo, '/todo/<int:id>')
 
 @app.route('/')
 def hello():
